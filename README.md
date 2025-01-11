@@ -19,7 +19,7 @@ This project is a simple shell implementation in C that provides basic functiona
 - Make sure you have access to a Unix-based system (Linux/macOS) or a compatible environment.
 
 ### Installation
-``
+
 1. **Clone the repository**:
 
    ```bash
@@ -28,37 +28,37 @@ This project is a simple shell implementation in C that provides basic functiona
 
 2. **Compile the code**:
 
-Use the following command to compile the shell code:
-```bash
-gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
+- Use the following command to compile the shell code:
+
+`gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh`
 
 3. Run the shell:
 
-After compiling, you can run your shell with:
+- After compiling, you can run your shell with:
 
-./hsh
+`./hsh`
 
-This will start the shell, and you will see the prompt ($ ).
+- This will start the shell, and you will see the prompt ($ ).
 
-### Usage
+## Usage
 
-Once the shell is running, you can enter commands:
+- Once the shell is running, you can enter commands:
 
 1. Execute commands: Type any command, e.g., ls, pwd, etc., after the prompt. For example:
 
-$ ls
+`$ ls`
 
-This will execute the ls command and display the directory contents.
+- This will execute the ls command and display the directory contents.
 
 2. Exit the shell: Type exit to exit the shell:
 
-$ exit
+`$ exit`
 
 3. Display environment variables: Type env to print the environment variables:
 
-$ env
+`$ env`
 
-###Functions Implemented
+## Functions Implemented
 
 Here’s a brief overview of the functions implemented in the shell:
 
@@ -67,6 +67,6 @@ read_command: Reads a line of input from the user.
 execute_command: Executes a single-word command entered by the user.
 handle_env: Prints the current environment variables.
 
-### Authors
+## Authors
 
 Eli Figueroa
