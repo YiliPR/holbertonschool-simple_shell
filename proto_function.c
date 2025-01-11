@@ -33,6 +33,7 @@ char *read_command(void)
  * execute_command - executes a given command using execve.
  * @command: the command to be executed.
  * @envp: the environment variables to be passed to the command.
+ * @argv: program name used for error reporting.
  * Return: void. The function does not return on successful execution.
  */
 void execute_command(char *command, char **envp)
@@ -41,8 +42,7 @@ void execute_command(char *command, char **envp)
 	int status;
 	char *args[2];
 
-	if (access(command, X_OK) != 0)
-	{
+	if (access(command, X_OK) != 0) {
 		fprintf(stderr, "%s: command not found\n", command);
 		return;
 	}
@@ -62,18 +62,7 @@ void execute_command(char *command, char **envp)
 	else if (pid > 0)
 		waitpid(pid, &status, 0);
 	else
+	{
 		perror("fork");
-}
-
-/**
- * handle_env - prints the current environment.
- * @envp: the environment variables.
- * Return: void.
- */
-void handle_env(char **envp)
-{
-	int i;
-
-	for (i = 0; envp[i]; i++)
-		printf("%s\n", envp[i]);
+	}
 }
