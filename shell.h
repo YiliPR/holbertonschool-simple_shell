@@ -7,9 +7,11 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-void display_prompt(void);
-char *read_command(void);
-void execute_command(char *command, char **envp);
-void handle_env(char **envp);
+void prompt_user(void);
+char *get_input(void);
+char **parse_input(char *input);
+int execute_command(char **args);
+int handle_exit(char **args);
+void handle_env(void);
 
-#endif /* SHELL_H */
+#endif

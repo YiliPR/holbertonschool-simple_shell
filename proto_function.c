@@ -1,68 +1,65 @@
 #include "shell.h"
 
 /**
- * display_prompt - displays the shell prompt to the user.
- * Return: void.
+ * prompt_user - Displays a shell prompt to the user.
+ *
+ * Return: void
  */
-void display_prompt(void)
+void prompt_user(void)
 {
-	printf("$ ");
-	fflush(stdout);
+	write(STDOUT_FILENO, "$ ", 2);
 }
 
 /**
- * read_command - reads a line of input from the user.
- * Return: the user input (command), or NULL if EOF is encountered.
+ * get_input - Reads input from the user.
+ *
+ * Return: A string containing the user input.
  */
-char *read_command(void)
+char *get_input(void)
 {
-	char *line = NULL;
-	size_t len = 0;
+	char *input = NULL;
+	size_t size = 0;
 
-	if (getline(&line, &len, stdin) == -1)
+	if (getline(&input, &size, stdin) == -1)
 	{
-		free(line);
-		return (NULL);
-	}
-
-	line[strcspn(line, "\n")] = '\0';
-	return (line);
-}
-
-/**
- * execute_command - executes a given command using execve.
- * @command: the command to be executed.
- * @envp: the environment variables to be passed to the command.
- * @argv: program name used for error reporting.
- * Return: void. The function does not return on successful execution.
- */
-void execute_command(char *command, char **envp)
-{
-	pid_t pid;
-	int status;
-	char *args[2];
-
-	if (access(command, X_OK) != 0) {
-		fprintf(stderr, "%s: command not found\n", command);
-		return;
-	}
-
-	args[0] = command;
-	args[1] = NULL;
-
-	pid = fork();
-	if (pid == 0)
-	{
-		if (execve(command, args, envp) == -1)
+		if (feof(stdin))
 		{
-			perror("execve");
-			exit(EXIT_FAILURE);
+			write(STDOUT_FILENO, "\n", 1);
+			exit(0);
 		}
+		perror("getline");
+		exit(1);
 	}
-	else if (pid > 0)
-		waitpid(pid, &status, 0);
-	else
+	return (input);
+}
+
+/**
+ * parse_input - Tokenizes the user input string into an argument array.
+ * @input: The input string.
+ *
+ * Return: An array of arguments (strings).
+ */
+char **parse_input(char *input)
+{
+	char **args;
+	char *token;
+	int position = 0;
+
+	args = malloc(sizeof(char *) * 64);
+	if (!args)
 	{
-		perror("fork");
+		perror("malloc");
+		exit(1);
 	}
+
+	token = strtok(input, " \t\r\n\a");
+	while (token != NULL)
+	{
+		args[position] = token;
+		position++;
+
+		token = strtok(NULL, " \t\r\n\a");
+	}
+	args[position] = NULL;
+	return (args);
 }

@@ -1,42 +1,32 @@
 #include "shell.h"
 
 /**
- * main - entry point of the shell program.
- * @argc: number of arguments passed to the program.
- * @argv: array of arguments passed to the program.
- * @envp: array of environment variables.
- * Return: 0 on success.
+ * main - The main entry point for the shell program.
+ * @argc: The number of command-line arguments (not used here).
+ * @argv: An array of strings containing the command-line arguments (not used here).
+ *
+ * Return: 0 on successful execution.
  */
-int main(int argc, char **argv, char **envp)
+
+int main(int argc, char *argv[])
 {
-	char *command;
+	char *input;
+	char **args;
+	int status = 1;
 
 	(void)argc;
 	(void)argv;
 
-	while (1)
+	while (status)
 	{
-		display_prompt();
-		command = read_command();
-		if (!command)
-		{
-			printf("\n");
-			break;
-		}
+		prompt_user();
+		input = get_input();
+		args = parse_input(input);
 
-		if (strcmp(command, "exit") == 0)
-		{
-			free(command);
-			break;
-		}
+		status = execute_command(args);
 
-		if (strcmp(command, "env") == 0)
-			handle_env(envp);
-		else
-			execute_command(command, envp);
-
-		free(command);
+		free(input);
+		free(args);
 	}
-
 	return (0);
 }
