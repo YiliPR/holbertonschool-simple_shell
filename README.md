@@ -62,10 +62,10 @@ This project is a simple shell implementation in C that provides basic functiona
 
 Here’s a brief overview of the functions implemented in the shell:
 
-display_prompt: Displays the shell prompt ($ ).
-read_command: Reads a line of input from the user.
-execute_command: Executes a single-word command entered by the user.
-handle_env: Prints the current environment variables.
+- display_prompt: Displays the shell prompt ($ ).
+- read_command: Reads a line of input from the user.
+- execute_command: Executes a single-word command entered by the user.
+- handle_env: Prints the current environment variables.
 
 ## Authors
 
