@@ -3,15 +3,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
 #include <sys/wait.h>
+#include <errno.h>
 
-void prompt_user(void);
-char *get_input(void);
-char **parse_input(char *input);
-int execute_command(char **args);
-int handle_exit(char **args);
-void handle_env(void);
+extern char **environ;
 
-#endif
+void shell_prompt(void);
+char *read_command(void);
+char **parse_command(char *command);
+int execute_command(char **args, char *program_name);
+void handle_exit(char **args);
+void print_env(void);
+
+#endif /* SHELL_H */

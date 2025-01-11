@@ -1,31 +1,45 @@
 #include "shell.h"
 
 /**
- * main - The main entry point for the shell program.
- * @argc: The number of command-line arguments (not used here).
- * @argv: An array of strings containing the command-line arguments (not used here).
- *
- * Return: 0 on successful execution.
+ * main - Entry point for the shell program.
+ * @argc: Argument count.
+ * @argv: Array of argument strings.
+ * Return: Always 0 on success.
  */
-
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-	char *input;
+	char *command;
 	char **args;
 	int status = 1;
 
-	(void)argc;
-	(void)argv;
+	(void)argc; /* Unused */
 
 	while (status)
 	{
-		prompt_user();
-		input = get_input();
-		args = parse_input(input);
+		shell_prompt();
+		command = read_command();
+		if (!command)
+		{
+			free(command);
+			break;
+		}
 
-		status = execute_command(args);
+		args = parse_command(command);
+		if (!args || !args[0])
+		{
+			free(command);
+			free(args);
+			continue;
+		}
 
-		free(input);
+		if (strcmp(args[0], "exit") == 0)
+			handle_exit(args);
+		else if (strcmp(args[0], "env") == 0)
+			print_env();
+		else
+			status = execute_command(args, argv[0]);
+
+		free(command);
 		free(args);
 	}
 	return (0);

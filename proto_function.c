@@ -1,65 +1,79 @@
 #include "shell.h"
 
 /**
- * prompt_user - Displays a shell prompt to the user.
- *
- * Return: void
+ * shell_prompt - Displays the shell prompt.
  */
-void prompt_user(void)
+void shell_prompt(void)
 {
 	write(STDOUT_FILENO, "$ ", 2);
 }
-
 /**
- * get_input - Reads input from the user.
- *
- * Return: A string containing the user input.
+ * read_command - Reads a command line from the user.
+ * Return: Pointer to the input command string.
  */
-char *get_input(void)
+char *read_command(void)
 {
-	char *input = NULL;
+	char *buffer = NULL;
 	size_t size = 0;
 
-	if (getline(&input, &size, stdin) == -1)
+	if (getline(&buffer, &size, stdin) == -1)
 	{
-		if (feof(stdin))
-		{
-			write(STDOUT_FILENO, "\n", 1);
-			exit(0);
-		}
-		perror("getline");
-		exit(1);
+		free(buffer);
+		return (NULL);
 	}
-	return (input);
+	return (buffer);
 }
-
 /**
- * parse_input - Tokenizes the user input string into an argument array.
- * @input: The input string.
- *
- * Return: An array of arguments (strings).
+ * parse_command - Splits a command line into arguments.
+ * @command: Pointer to the input command string.
+ * Return: Array of pointers to arguments.
  */
-char **parse_input(char *input)
+char **parse_command(char *command)
 {
-	char **args;
+	char **args = NULL;
 	char *token;
-	int position = 0;
+	size_t i = 0;
 
-	args = malloc(sizeof(char *) * 64);
+	args = malloc(1024 * sizeof(char *));
 	if (!args)
-	{
-		perror("malloc");
-		exit(1);
-	}
+		return (NULL);
 
-	token = strtok(input, " \t\r\n\a");
-	while (token != NULL)
+	token = strtok(command, " \t\n");
+	while (token)
 	{
-		args[position] = token;
-		position++;
-
-		token = strtok(NULL, " \t\r\n\a");
+		args[i++] = token;
+		token = strtok(NULL, " \t\n");
 	}
-	args[position] = NULL;
+	args[i] = NULL;
 	return (args);
+}
+/**
+ * execute_command - Executes a command using execve.
+ * @args: Array of arguments for the command.
+ * @program_name: Name of the shell program (argv[0]).
+ * Return: 1 on success, 0 on failure.
+ */
+int execute_command(char **args, char *program_name)
+{
+	pid_t pid;
+	int status;
+
+	pid = fork();
+	if (pid == 0)
+	{
+		if (execve(args[0], args, environ) == -1)
+		{
+			fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
+			exit(EXIT_FAILURE);
+		}
+	}
+	else if (pid < 0)
+	{
+		perror("Error");
+	}
+	else
+	{
+		wait(&status);
+	}
+	return (1);
 }
