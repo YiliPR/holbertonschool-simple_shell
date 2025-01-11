@@ -19,16 +19,17 @@ This project is a simple shell implementation in C that provides basic functiona
 - Make sure you have access to a Unix-based system (Linux/macOS) or a compatible environment.
 
 ### Installation
-
+``
 1. **Clone the repository**:
 
    ```bash
    git clone https://github.com/holbertonschool/simple_shell.git
    cd simple_shell
+
 2. **Compile the code**:
 
 Use the following command to compile the shell code:
-
+```bash
 gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 
 3. Run the shell:
