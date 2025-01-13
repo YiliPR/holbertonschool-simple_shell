@@ -1,41 +1,23 @@
 #include "shell.h"
 
 /**
- * execute_command - Executes a command by searching PATH and using execve
- * @command: The command to execute
+ * trim_whitespace - Removes leading and trailing spaces from a string
+ * @str: Input string
+ * Return: Pointer to trimmed string
  */
-void execute_command(char *command)
+char *trim_whitespace(char *str)
 {
-	pid_t pid;
-	char *path = NULL;
+	char *end;
 
-	path = find_command_path(command);
-	if (path == NULL)
-	{
-		write(STDERR_FILENO, command, strlen(command));
-		write(STDERR_FILENO, ": command not found\n", 20);
-		return;
-	}
+	while (isspace((unsigned char)*str))
+		str++;
+	if (*str == 0)
+		return str;
 
-	pid = fork();
-	if (pid == 0)
-	{
-		char *argv[] = {path, NULL};
-		if (execve(path, argv, environ) == -1)
-		{
-			perror(command);
-			free(path);
-			exit(EXIT_FAILURE);
-		}
-	}
-	else if (pid > 0)
-	{
-		wait(NULL);
-	}
-	else
-	{
-		perror("fork");
-	}
+	end = str + strlen(str) - 1;
+	while (end > str && isspace((unsigned char)*end))
+		end--;
+	end[1] = '\0';
 
-	free(path);
+	return (str);
 }

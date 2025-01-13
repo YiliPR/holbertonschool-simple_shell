@@ -3,15 +3,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
+#include <unistd.h>
 #include <sys/wait.h>
-#include <errno.h>
+#include <ctype.h>
 
 extern char **environ;
 
+char *trim_whitespace(char *str);
 void execute_command(char *command);
-char *find_command_path(char *command);
+void print_env(void);
 
 #endif /* SHELL_H */

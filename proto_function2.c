@@ -1,47 +1,77 @@
 #include "shell.h"
-
-/**
- * find_command_path - Searches the PATH for a command
- * @command: The command to find
- *
- * Return: The full path of the command, or NULL if not found
- */
-char *find_command_path(char *command)
+void execute_command(char *command)
 {
-	char *path = getenv("PATH");
-	char *path_copy = NULL, *dir = NULL;
-	char *full_path = NULL;
+	char *argv[20];
+	char *path = getenv("PATH"), *full_path;
+	char *token = strtok(path, ":");
+	pid_t pid;
+	int argc = 0;
 
-	if (path == NULL)
-		return (NULL);
+	argv[argc++] = strtok(command, " ");
+	while ((argv[argc++] = strtok(NULL, " ")) != NULL);
 
-	path_copy = strdup(path);
-	if (path_copy == NULL)
-		return (NULL);
+	argv[--argc] = NULL;
 
-	dir = strtok(path_copy, ":");
-	while (dir != NULL)
+	if (argv[0][0] == '/' && access(argv[0], X_OK) == 0)
 	{
-		full_path = malloc(strlen(dir) + strlen(command) + 2);
-		if (full_path == NULL)
+		pid = fork();
+		if (pid == 0)
 		{
-			free(path_copy);
-			return (NULL);
+			execve(argv[0], argv, environ);
+			perror("execve");
+			exit(EXIT_FAILURE);
 		}
-
-		sprintf(full_path, "%s/%s", dir, command);
-
-		/* Check if the command is executable */
-		if (access(full_path, X_OK) == 0)
+		else if (pid > 0)
 		{
-			free(path_copy);
-			return (full_path);
+			wait(NULL);
+			return;
 		}
-
-		free(full_path);
-		dir = strtok(NULL, ":");
+		perror("fork");
+		return;
 	}
 
-	free(path_copy);
-	return (NULL);
+	while (token)
+	{
+		full_path = malloc(strlen(token) + strlen(argv[0]) + 2);
+		sprintf(full_path, "%s/%s", token, argv[0]);
+		if (access(full_path, X_OK) == 0)
+		{
+			pid = fork();
+			if (pid == 0)
+			{
+				execve(full_path, argv, environ);
+				perror("execve");
+				exit(EXIT_FAILURE);
+			}
+			else if (pid > 0)
+			{
+				wait(NULL);
+				free(full_path);
+				return;
+			}
+			perror("fork");
+			free(full_path);
+			return;
+		}
+		free(full_path);
+		token = strtok(NULL, ":");
+	}
+
+	write(STDERR_FILENO, argv[0], strlen(argv[0]));
+	write(STDERR_FILENO, ": command not found\n", 20);
+}
+
+/**
+ * print_env - Prints the current environment variables
+ */
+void print_env(void)
+{
+	char **env = environ;
+
+	while (*env)
+	{
+		write(STDOUT_FILENO, *env, strlen(*env));
+		write(STDOUT_FILENO, "\n", 1);
+		env++;
+	}
 }
