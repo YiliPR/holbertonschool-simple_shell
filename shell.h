@@ -11,11 +11,7 @@
 
 extern char **environ;
 
-void shell_prompt(void);
-char *read_command(void);
-char **parse_command(char *command);
-int execute_command(char **args, char *program_name);
-void handle_exit(char **args);
-void print_env(void);
-char *find_path(char *cmd);
+void execute_command(char *command);
+char *find_command_path(char *command);
+
 #endif /* SHELL_H */

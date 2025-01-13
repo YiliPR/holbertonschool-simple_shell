@@ -1,46 +1,35 @@
 #include "shell.h"
 
 /**
- * main - Entry point for the shell program.
- * @argc: Argument count.
- * @argv: Array of argument strings.
- * Return: Always 0 on success.
+ * main - Entry point of the shell program
+ *
+ * Return: Always 0 on success
  */
-int main(int argc, char **argv)
+int main(void)
 {
-	char *command;
-	char **args;
-	int status = 1;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t nread;
 
-	(void)argc; /* Unused */
-
-	while (status)
+	while (1)
 	{
-		shell_prompt();
-		command = read_command();
-		if (!command)
+		write(STDOUT_FILENO, ":) ", 3);
+
+		nread = getline(&line, &len, stdin);
+		if (nread == -1)
 		{
-			free(command);
-			break;
+			free(line);
+			write(STDOUT_FILENO, "\n", 1);
+			exit(EXIT_SUCCESS);
 		}
 
-		args = parse_command(command);
-		if (!args || !args[0])
-		{
-			free(command);
-			free(args);
-			continue;
-		}
+		if (line[nread - 1] == '\n')
+			line[nread - 1] = '\0';
 
-		if (strcmp(args[0], "exit") == 0)
-			handle_exit(args);
-		else if (strcmp(args[0], "env") == 0)
-			print_env();
-		else
-			status = execute_command(args, argv[0]);
-
-		free(command);
-		free(args);
+		if (line[0] != '\0')
+			execute_command(line);
 	}
+
+	free(line);
 	return (0);
 }

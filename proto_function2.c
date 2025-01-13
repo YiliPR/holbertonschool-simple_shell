@@ -1,52 +1,47 @@
 #include "shell.h"
 
 /**
- * execute_command - Executes a command using execve after checking the path.
- * @args: Array of arguments for the command.
- * @program_name: Name of the shell program (argv[0]).
- * Return: 1 on success, 0 on failure.
+ * find_command_path - Searches the PATH for a command
+ * @command: The command to find
+ *
+ * Return: The full path of the command, or NULL if not found
  */
-
-int execute_command(char **args, char *program_name)
+char *find_command_path(char *command)
 {
-	pid_t pid;
-	int status;
-	char *path = args[0];
+	char *path = getenv("PATH");
+	char *path_copy = NULL, *dir = NULL;
 	char *full_path = NULL;
 
-	if (access(path, F_OK) == 0)
+	if (path == NULL)
+		return (NULL);
+
+	path_copy = strdup(path);
+	if (path_copy == NULL)
+		return (NULL);
+
+	dir = strtok(path_copy, ":");
+	while (dir != NULL)
 	{
-		full_path = path;
-	}
-	else
-	{
-		full_path = find_path(path);
+		full_path = malloc(strlen(dir) + strlen(command) + 2);
+		if (full_path == NULL)
+		{
+			free(path_copy);
+			return (NULL);
+		}
+
+		sprintf(full_path, "%s/%s", dir, command);
+
+		/* Check if the command is executable */
+		if (access(full_path, X_OK) == 0)
+		{
+			free(path_copy);
+			return (full_path);
+		}
+
+		free(full_path);
+		dir = strtok(NULL, ":");
 	}
 
-	if (full_path)
-	{
-		pid = fork();
-		if (pid == 0)
-		{
-			if (execve(full_path, args, environ) == -1)
-			{
-				fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
-				exit(EXIT_FAILURE);
-			}
-		}
-		else if (pid < 0)
-		{
-			perror("Error");
-		}
-		else
-		{
-			wait(&status);
-		}
-		free(full_path);
-	}
-	else
-	{
-		fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
-	}
-	return (1);
+	free(path_copy);
+	return (NULL);
 }

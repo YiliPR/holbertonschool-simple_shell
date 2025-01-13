@@ -1,54 +1,41 @@
 #include "shell.h"
 
 /**
- * shell_prompt - Displays the shell prompt.
+ * execute_command - Executes a command by searching PATH and using execve
+ * @command: The command to execute
  */
-
-void shell_prompt(void)
+void execute_command(char *command)
 {
-	write(STDOUT_FILENO, "$ ", 2);
-}
+	pid_t pid;
+	char *path = NULL;
 
-/**
- * read_command - Reads a command line from the user.
- * Return: Pointer to the input command string.
- */
-
-char *read_command(void)
-{
-	char *buffer = NULL;
-	size_t size = 0;
-
-	if (getline(&buffer, &size, stdin) == -1)
+	path = find_command_path(command);
+	if (path == NULL)
 	{
-		free(buffer);
-		return (NULL);
+		write(STDERR_FILENO, command, strlen(command));
+		write(STDERR_FILENO, ": command not found\n", 20);
+		return;
 	}
-	return (buffer);
-}
 
-/**
- * parse_command - Splits a command line into arguments.
- * @command: Pointer to the input command string.
- * Return: Array of pointers to arguments.
- */
-
-char **parse_command(char *command)
-{
-	char **args = NULL;
-	char *token;
-	size_t i = 0;
-
-	args = malloc(1024 * sizeof(char *));
-	if (!args)
-		return (NULL);
-
-	token = strtok(command, " \t\n");
-	while (token)
+	pid = fork();
+	if (pid == 0)
 	{
-		args[i++] = token;
-		token = strtok(NULL, " \t\n");
+		char *argv[] = {path, NULL};
+		if (execve(path, argv, environ) == -1)
+		{
+			perror(command);
+			free(path);
+			exit(EXIT_FAILURE);
+		}
 	}
-	args[i] = NULL;
-	return (args);
+	else if (pid > 0)
+	{
+		wait(NULL);
+	}
+	else
+	{
+		perror("fork");
+	}
+
+	free(path);
 }
