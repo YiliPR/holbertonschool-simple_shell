@@ -2,7 +2,7 @@
 
 int main(void)
 {
-	char *line = NULL, *command = NULL;
+	char *line = NULL;
 	size_t len = 0;
 	ssize_t nread;
 
@@ -17,22 +17,20 @@ int main(void)
 			exit(EXIT_SUCCESS);
 		}
 
-		command = trim_whitespace(line);
-		if (*command == '\0')
-			continue;
-
-		if (strcmp(command, "exit") == 0)
+		line[nread - 1] = '\0';
+		if (strcmp(line, "exit") == 0)
 		{
 			free(line);
 			exit(EXIT_SUCCESS);
 		}
-		if (strcmp(command, "env") == 0)
+
+		if (strcmp(line, "env") == 0)
 		{
-			print_env();
+			print_environment();
 			continue;
 		}
 
-		execute_command(command);
+		execute_command(line);
 	}
 
 	free(line);

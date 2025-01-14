@@ -1,77 +1,46 @@
 #include "shell.h"
-void execute_command(char *command)
+
+/**
+ * search_in_path - Searches for a command in the PATH directories
+ * @command: Command to search for
+ *
+ * Return: Full path of the command if found, NULL otherwise
+ */
+
+char *search_in_path(char *command)
 {
-	char *argv[20];
-	char *path = getenv("PATH"), *full_path;
-	char *token = strtok(path, ":");
-	pid_t pid;
-	int argc = 0;
+	char *path = getenv("PATH");
+	char *path_copy, *token, *full_path;
+	size_t command_len = strlen(command);
 
-	argv[argc++] = strtok(command, " ");
-	while ((argv[argc++] = strtok(NULL, " ")) != NULL);
+	if (!path)
+		return (NULL);
 
-	argv[--argc] = NULL;
+	path_copy = strdup(path);
+	if (!path_copy)
+		return (NULL);
 
-	if (argv[0][0] == '/' && access(argv[0], X_OK) == 0)
-	{
-		pid = fork();
-		if (pid == 0)
-		{
-			execve(argv[0], argv, environ);
-			perror("execve");
-			exit(EXIT_FAILURE);
-		}
-		else if (pid > 0)
-		{
-			wait(NULL);
-			return;
-		}
-		perror("fork");
-		return;
-	}
-
+	token = strtok(path_copy, ":");
 	while (token)
 	{
-		full_path = malloc(strlen(token) + strlen(argv[0]) + 2);
-		sprintf(full_path, "%s/%s", token, argv[0]);
+		full_path = malloc(strlen(token) + command_len + 2);
+		if (!full_path)
+		{
+			free(path_copy);
+			return (NULL);
+		}
+
+		sprintf(full_path, "%s/%s", token, command);
 		if (access(full_path, X_OK) == 0)
 		{
-			pid = fork();
-			if (pid == 0)
-			{
-				execve(full_path, argv, environ);
-				perror("execve");
-				exit(EXIT_FAILURE);
-			}
-			else if (pid > 0)
-			{
-				wait(NULL);
-				free(full_path);
-				return;
-			}
-			perror("fork");
-			free(full_path);
-			return;
+			free(path_copy);
+			return (full_path);
 		}
+
 		free(full_path);
 		token = strtok(NULL, ":");
 	}
 
-	write(STDERR_FILENO, argv[0], strlen(argv[0]));
-	write(STDERR_FILENO, ": command not found\n", 20);
-}
-
-/**
- * print_env - Prints the current environment variables
- */
-void print_env(void)
-{
-	char **env = environ;
-
-	while (*env)
-	{
-		write(STDOUT_FILENO, *env, strlen(*env));
-		write(STDOUT_FILENO, "\n", 1);
-		env++;
-	}
+	free(path_copy);
+	return (NULL);
 }
